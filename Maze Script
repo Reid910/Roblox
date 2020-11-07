@@ -1,0 +1,618 @@
+local module = {}
+
+local Replicated = game:GetService("ReplicatedStorage")
+Tiles = {}
+AddToNext = {}
+
+function CheckArea(x,z,Rot)
+	local Directions = {"Left", "Forward", "Right"}
+	local function CannotGoAPath(String)
+		for i,v in pairs(Directions) do
+			if v == String then
+				table.remove(Directions, i)
+			end
+		end
+	end
+
+	for i,v in pairs(Tiles) do
+		if v[1] == x and v[2] == z then
+			return false
+		end
+	end
+	for _,c in pairs(Tiles) do
+		if Rot == "Left" then
+			if c[1] == x-1 and c[2] == z then--CheckLeftOption
+				if c[3] ~= "Backward" then
+					if c[3] == "Left" then
+						if c[4] == 2 and c[5] == "Left" then
+							CannotGoAPath("Left")
+						elseif c[4] == 1 and c[5] ~= "Right" then
+							CannotGoAPath("Left")
+						end
+					elseif c[3] == "Forward" then
+						if c[4] == 2 and c[5] == "Forward" then
+							CannotGoAPath("Left")
+						elseif c[4] == 1 and c[5] ~= "Forward" then
+							CannotGoAPath("Left")
+						end
+					elseif c[3] == "Right" then
+						if c[4] == 2 and c[5] == "Right" then
+							CannotGoAPath("Left")
+						elseif c[4] == 1 and c[5] ~= "Left" then
+							CannotGoAPath("Left")
+						end
+					end
+				end
+			elseif c[1] == x and c[2] == z-1 then--CheckForwardOption
+				if c[3] ~= "Left" then
+					if c[3] == "Backward" then
+						if c[4] == 2 and c[5] == "Right" then
+							CannotGoAPath("Forward")
+						elseif c[4] == 1 and c[5] ~= "Left" then
+							CannotGoAPath("Forward")
+						end
+					elseif c[3] == "Forward" then
+						if c[4] == 2 and c[5] == "Left" then
+							CannotGoAPath("Forward")
+						elseif c[4] == 1 and c[5] ~= "Right" then
+							CannotGoAPath("Forward")
+						end
+					elseif c[3] == "Right" then
+						if c[4] == 2 and c[5] == "Forward" then
+							CannotGoAPath("Forward")
+						elseif c[4] == 1 and c[5] ~= "Forward" then
+							CannotGoAPath("Forward")
+						end
+					end
+				end
+			elseif c[1] == x+1 and c[2] == z then--CheckRightOption
+				if c[3] ~= "Forward" then
+					if c[3] == "Backward" then
+						if c[4] == 2 and c[5] == "Forward" then
+							CannotGoAPath("Right")
+						elseif c[4] == 1 and c[5] ~= "Forward" then
+							CannotGoAPath("Right")
+						end
+					elseif c[3] == "Left" then
+						if c[4] == 2 and c[5] == "Right" then
+							CannotGoAPath("Right")
+						elseif c[4] == 1 and c[5] ~= "Left" then
+							CannotGoAPath("Right")
+						end
+					elseif c[3] == "Right" then
+						if c[4] == 2 and c[5] == "Left" then
+							CannotGoAPath("Right")
+						elseif c[4] == 1 and c[5] ~= "Right" then
+							CannotGoAPath("Right")
+						end
+					end
+				end
+			end
+		elseif Rot == "Forward" then
+			if c[1] == x and c[2] == z-1 then--CheckLeftOption
+				if c[3] ~= "Left" then
+					if c[3] == "Backward" then
+						if c[4] == 2 and c[5] == "Right" then
+							CannotGoAPath("Left")
+						elseif c[4] == 1 and c[5] ~= "Left" then
+							CannotGoAPath("Left")
+						end
+					elseif c[3] == "Forward" then
+						if c[4] == 2 and c[5] == "Left" then
+							CannotGoAPath("Left")
+						elseif c[4] == 1 and c[5] ~= "Right" then
+							CannotGoAPath("Left")
+						end
+					elseif c[3] == "Right" then
+						if c[4] == 2 and c[5] == "Forward" then
+							CannotGoAPath("Left")
+						elseif c[4] == 1 and c[5] ~= "Forward" then
+							CannotGoAPath("Left")
+						end
+					end
+				end
+			elseif c[1] == x+1 and c[2] == z then--CheckForwardOption
+				if c[3] ~= "Forward" then
+					if c[3] == "Backward" then
+						if c[4] == 2 and c[5] == "Forward" then
+							CannotGoAPath("Forward")
+						elseif c[4] == 1 and c[5] ~= "Forward" then
+							CannotGoAPath("Forward")
+						end
+					elseif c[3] == "Left" then
+						if c[4] == 2 and c[5] == "Right" then
+							CannotGoAPath("Forward")
+						elseif c[4] == 1 and c[5] ~= "Left" then
+							CannotGoAPath("Forward")
+						end
+					elseif c[3] == "Right" then
+						if c[4] == 2 and c[5] == "Left" then
+							CannotGoAPath("Forward")
+						elseif c[4] == 1 and c[5] ~= "Right" then
+							CannotGoAPath("Forward")
+						end
+					end
+				end
+			elseif c[1] == x and c[2] == z+1 then--CheckRightOption
+				if c[3] ~= "Right" then
+					if c[3] == "Backward" then
+						if c[4] == 2 and c[5] == "Left" then
+							CannotGoAPath("Right")
+						elseif c[4] == 1 and c[5] ~= "Right" then
+							CannotGoAPath("Right")
+						end
+					elseif c[3] == "Left" then
+						if c[4] == 2 and c[5] == "Forward" then
+							CannotGoAPath("Right")
+						elseif c[4] == 1 and c[5] ~= "Forward" then
+							CannotGoAPath("Right")
+						end
+					elseif c[3] == "Forward" then
+						if c[4] == 2 and c[5] == "Right" then
+							CannotGoAPath("Right")
+						elseif c[4] == 1 and c[5] ~= "Left" then
+							CannotGoAPath("Right")
+						end
+					end
+				end
+			end
+		elseif Rot == "Right" then
+			if c[1] == x+1 and c[2] == z then--CheckLeftOption
+				if c[3] == "Backward" then
+					if c[4] == 2 and c[5] == "Forward" then
+						CannotGoAPath("Left")
+					elseif c[4] == 1 and c[5] ~= "Forward" then
+						CannotGoAPath("Left")
+					end
+				elseif c[3] == "Left" then
+					if c[4] == 2 and c[5] == "Right" then
+						CannotGoAPath("Left")
+					elseif c[4] == 1 and c[5] ~= "Left" then
+						CannotGoAPath("Left")
+					end
+				elseif c[3] == "Right" then
+					if c[4] == 2 and c[5] == "Left" then
+						CannotGoAPath("Left")
+					elseif c[4] == 1 and c[5] ~= "Right" then
+						CannotGoAPath("Left")
+					end
+				end
+			elseif c[1] == x and c[2] == z+1 then--CheckForwardOption
+				if c[3] == "Backward" then
+					if c[4] == 2 and c[5] == "Left" then
+						CannotGoAPath("Forward")
+					elseif c[4] == 1 and c[5] ~= "Right" then
+						CannotGoAPath("Forward")
+					end
+				elseif c[3] == "Left" then
+					if c[4] == 2 and c[5] == "Forward" then
+						CannotGoAPath("Forward")
+					elseif c[4] == 1 and c[5] ~= "Forward" then
+						CannotGoAPath("Forward")
+					end
+				elseif c[3] == "Forward" then
+					if c[4] == 2 and c[5] == "Right" then
+						CannotGoAPath("Forward")
+					elseif c[4] == 1 and c[5] ~= "Left" then
+						CannotGoAPath("Forward")
+					end
+				end
+			elseif c[1] == x-1 and c[2] == z then--CheckRightOption
+				if c[3] == "Right" then
+					if c[4] == 2 and c[5] == "Right" then
+						CannotGoAPath("Right")
+					elseif c[4] == 1 and c[5] ~= "Left" then
+						CannotGoAPath("Right")
+					end
+				elseif c[3] == "Left" then
+					if c[4] == 2 and c[5] == "Left" then
+						CannotGoAPath("Right")
+					elseif c[4] == 1 and c[5] ~= "Right" then
+						CannotGoAPath("Right")
+					end
+				elseif c[3] == "Forward" then
+					if c[4] == 2 and c[5] == "Forward" then
+						CannotGoAPath("Right")
+					elseif c[4] == 1 and c[5] ~= "Forward" then
+						CannotGoAPath("Right")
+					end
+				end
+			end
+		elseif Rot == "Backward" then
+			if c[1] == x and c[2] == z+1 then--CheckLeftOption
+				if c[3] == "Forward" then
+					if c[4] == 2 and c[5] == "Right" then
+						CannotGoAPath("Left")
+					elseif c[4] == 1 and c[5] ~= "Left" then
+						CannotGoAPath("Left")
+					end
+				elseif c[3] == "Left" then
+					if c[4] == 2 and c[5] == "Forward" then
+						CannotGoAPath("Left")
+					elseif c[4] == 1 and c[5] ~= "Forward" then
+						CannotGoAPath("Left")
+					end
+				elseif c[3] == "Backward" then
+					if c[4] == 2 and c[5] == "Left" then
+						CannotGoAPath("Left")
+					elseif c[4] == 1 and c[5] ~= "Right" then
+						CannotGoAPath("Left")
+					end
+				end
+			elseif c[1] == x-1 and c[2] == z then--CheckForwardOption
+				if c[3] == "Right" then
+					if c[4] == 2 and c[5] == "Right" then
+						CannotGoAPath("Forward")
+					elseif c[4] == 1 and c[5] ~= "Left" then
+						CannotGoAPath("Forward")
+					end
+				elseif c[3] == "Left" then
+					if c[4] == 2 and c[5] == "Left" then
+						CannotGoAPath("Forward")
+					elseif c[4] == 1 and c[5] ~= "Right" then
+						CannotGoAPath("Forward")
+					end
+				elseif c[3] == "Forward" then
+					if c[4] == 2 and c[5] == "Forward" then
+						CannotGoAPath("Forward")
+					elseif c[4] == 1 and c[5] ~= "Forward" then
+						CannotGoAPath("Forward")
+					end
+				end
+			elseif c[1] == x and c[2] == z-1 then--CheckRightOption
+				if c[3] == "Right" then
+					if c[4] == 2 and c[5] == "Forward" then
+						CannotGoAPath("Right")
+					elseif c[4] == 1 and c[5] ~= "Forward" then
+						CannotGoAPath("Right")
+					end
+				elseif c[3] == "Backward" then
+					if c[4] == 2 and c[5] == "Right" then
+						CannotGoAPath("Right")
+					elseif c[4] == 1 and c[5] ~= "Left" then
+						CannotGoAPath("Right")
+					end
+				elseif c[3] == "Forward" then
+					if c[4] == 2 and c[5] == "Left" then
+						CannotGoAPath("Right")
+					elseif c[4] == 1 and c[5] ~= "Right" then
+						CannotGoAPath("Right")
+					end
+				end
+			end
+		end
+	end
+	return Directions
+end
+
+function CreateTileInfo(Exits, Rotation, Options)
+	local AddX
+	local AddZ
+	local ExitDirection
+	if Rotation == "Left" then
+		AddX = 0
+		AddZ = -1
+	elseif Rotation == "Forward" then
+		AddX = 1
+		AddZ = 0
+	elseif Rotation == "Right" then
+		AddX = 0
+		AddZ = 1
+	elseif Rotation == "Backward" then
+		AddX = -1
+		AddZ = 0
+	end
+
+	if Exits == 3 then
+		ExitDirection = "Forward"
+	elseif Exits == 2 then
+		if #Options == 3 then
+			ExitDirection = Options[math.random(1,#Options)]
+		else
+			local Left = false
+			local Forward = false
+			local Right = false
+			for i,v in pairs(Options) do
+				if v == "Left" then
+					Left = true
+				elseif v == "Forward" then
+					Forward = true
+				elseif v == "Right" then
+					Right = true
+				end
+			end
+			if Left == false then
+				ExitDirection = "Right"
+			elseif Forward == false then
+				ExitDirection = "Forward"
+			elseif Right == false then
+				ExitDirection = "Left"
+			end
+		end
+	elseif Exits == 1 then
+		ExitDirection = Options[math.random(1,#Options)]
+	end
+	return  AddX, AddZ, ExitDirection
+end
+
+function CreateTile(x,z,Rotation, End)
+	local TableOfDirections = CheckArea(x,z,Rotation)
+
+	if not TableOfDirections and End == "EndPiece" then
+		return false
+	end
+	
+	if TableOfDirections and not End then
+		if #TableOfDirections == 0 then
+			local AddX, AddZ, ExitDirection = CreateTileInfo(0, Rotation, TableOfDirections)
+			local FolderChildren = Replicated.Models.DeadEnd:GetChildren()
+			local Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+			Copy:SetPrimaryPartCFrame(CFrame.new(Vector3.new(x*50,0,z*50), Vector3.new((x + AddX)*50,0,(z + AddZ)*50)))
+			table.insert(Tiles, {x,z,Rotation,0,"Forward"})
+			table.insert(AddToNext, {x,z,Rotation,0,"Forward"})
+			Copy.Parent = game:GetService("Workspace").GenMaze
+		else
+			local Exits = math.random(1,#TableOfDirections)
+			local AddX, AddZ, ExitDirection = CreateTileInfo(Exits, Rotation, TableOfDirections)
+			local Copy
+			if Exits == 1 then
+				if ExitDirection == "Left" then
+					local FolderChildren = Replicated.Models.One.Left:GetChildren()
+					Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+				elseif ExitDirection == "Forward" then
+					local FolderChildren = Replicated.Models.One.Forward:GetChildren()
+					Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+				elseif ExitDirection == "Right" then
+					local FolderChildren = Replicated.Models.One.Right:GetChildren()
+					Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+				end
+			elseif Exits == 2 then
+				if ExitDirection == "Left" then
+					local FolderChildren = Replicated.Models.Two.Left:GetChildren()
+					Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+				elseif ExitDirection == "Forward" then
+					local FolderChildren = Replicated.Models.Two.Forward:GetChildren()
+					Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+				elseif ExitDirection == "Right" then
+					local FolderChildren = Replicated.Models.Two.Right:GetChildren()
+					Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+				end
+			elseif Exits == 3 then
+				local FolderChildren = Replicated.Models.Three:GetChildren()
+				Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+			end
+			Copy:SetPrimaryPartCFrame(CFrame.new(Vector3.new(x*50,0,z*50), Vector3.new((x + AddX)*50,0,(z + AddZ)*50)))
+			table.insert(Tiles, {x,z,Rotation,Exits,ExitDirection})
+			table.insert(AddToNext, {x,z,Rotation,Exits,ExitDirection})
+			Copy.Parent = game:GetService("Workspace").GenMaze
+			for i,v in pairs(Copy:GetDescendants()) do
+				if v:IsA("Script") then
+					v.Disabled = false
+				end
+			end
+		end
+	elseif TableOfDirections and End then
+		local AddX, AddZ, ExitDirection = CreateTileInfo(0, Rotation, TableOfDirections)
+		local Copy
+		if End == "EndPiece" then
+			local FolderChildren = Replicated.Models.Special:GetChildren()
+			Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+			Copy.End.Script.Disabled = false
+			print("Placed End At "..os.time().." "..x..","..z.." "..Rotation)
+		else
+			local FolderChildren = Replicated.Models.DeadEnd:GetChildren()
+			Copy = FolderChildren[math.random(1,#FolderChildren)]:Clone()
+		end
+		Copy:SetPrimaryPartCFrame(CFrame.new(Vector3.new(x*50,0,z*50), Vector3.new((x + AddX)*50,0,(z + AddZ)*50)))
+		table.insert(Tiles, {x,z,Rotation,0,"Forward"})
+		table.insert(AddToNext, {x,z,Rotation,0,"Forward"})
+		Copy.Parent = game:GetService("Workspace").GenMaze
+		return true
+	end
+end
+
+function GetXZandRot(x ,z, Rot, ExitDir)
+	if Rot == "Left" then
+		if ExitDir == "Left" then
+			return x-1, z, "Backward"
+		elseif ExitDir == "Forward" then
+			return x, z-1, "Left"
+		elseif ExitDir == "Right" then
+			return x+1, z, "Forward"
+		end
+	elseif Rot == "Forward" then
+		if ExitDir == "Left" then
+			return x, z-1, "Left"
+		elseif ExitDir == "Forward" then
+			return x+1, z, "Forward"
+		elseif ExitDir == "Right" then
+			return x, z+1, "Right"
+		end
+	elseif Rot == "Right" then
+		if ExitDir == "Left" then
+			return x+1, z, "Forward"
+		elseif ExitDir == "Forward" then
+			return x, z+1, "Right"
+		elseif ExitDir == "Right" then
+			return x-1, z, "Backward"
+		end
+	elseif Rot == "Backward" then
+		if ExitDir == "Left" then
+			return x, z+1, "Right"
+		elseif ExitDir == "Forward" then
+			return x-1, z, "Backward"
+		elseif ExitDir == "Right" then
+			return x, z-1, "Left"
+		end
+	end
+end
+
+function module.GenMap(Loops, LengthOfSpawn)
+	Tiles = {}
+	AddToNext = {}
+	for i = 1,LengthOfSpawn do
+		for c = 1,4 do
+			local Num = 50 * i
+			local Copy = Replicated.Models.One.Forward.Model:Clone()
+			if c == 1 then
+				Copy:SetPrimaryPartCFrame(CFrame.new(Vector3.new(0,0,Num), Vector3.new(0,0,Num + 1)))
+				table.insert(Tiles, {0,i,"Right",1,"Forward"})
+				if i == LengthOfSpawn then
+					table.insert(AddToNext, {0,i,"Right",1,"Forward"})
+				end
+			elseif c == 2 then
+				Copy:SetPrimaryPartCFrame(CFrame.new(Vector3.new(-Num,0,0), Vector3.new(-Num - 1,0,0)))
+				table.insert(Tiles, {-i,0,"Backward",1,"Forward"})
+				if i == 2 then
+					table.insert(AddToNext, {-i,0,"Backward",1,"Forward"})
+				else
+
+				end
+			elseif c == 3 then
+				Copy:SetPrimaryPartCFrame(CFrame.new(Vector3.new(0,0,-Num), Vector3.new(0,0,-Num - 1)))
+				table.insert(Tiles, {0,-i,"Left",1,"Forward"})
+				if i == LengthOfSpawn then
+					table.insert(AddToNext, {0,-i,"Left",1,"Forward"})
+				end
+			elseif c == 4 then
+				Copy:SetPrimaryPartCFrame(CFrame.new(Vector3.new(Num,0,0), Vector3.new(Num + 1,0,0)))
+				table.insert(Tiles, {i,0,"Forward",1,"Forward"})
+				if i == LengthOfSpawn then
+					table.insert(AddToNext, {i,0,"Forward",1,"Forward"})
+				end
+			end
+			Copy.Parent = game:GetService("Workspace").GenMaze
+		end
+	end
+	for loop = 1, Loops do
+		wait(tick)
+		local AddingNext = AddToNext
+		AddToNext = {}
+		for i,v in pairs(AddingNext) do
+			local Exits = v[4]
+			local ExitDirection = v[5]
+			if Exits == 1 then
+				local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], ExitDirection)
+				CreateTile(x,z,Rotation)
+			elseif Exits == 2 then
+				if ExitDirection == "Left" then
+					local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Left")
+					CreateTile(x,z,Rotation)
+					local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Forward")
+					CreateTile(x,z,Rotation)
+				elseif ExitDirection == "Forward" then
+					local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Left")
+					CreateTile(x,z,Rotation)
+					local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Right")
+					CreateTile(x,z,Rotation)
+				elseif ExitDirection == "Right" then
+					local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Right")
+					CreateTile(x,z,Rotation)
+					local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Forward")
+					CreateTile(x,z,Rotation)
+				end
+			elseif Exits == 3 then
+				local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Left")
+				CreateTile(x,z,Rotation)
+				local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Forward")
+				CreateTile(x,z,Rotation)
+				local x, z, Rotation = GetXZandRot(v[1], v[2], v[3], "Right")
+				CreateTile(x,z,Rotation)
+			end
+		end
+	end
+	local AddingNext = AddToNext
+	AddToNext = {}
+	local count = 0
+	for i,v in pairs(AddingNext) do
+		count = count + v[4]
+	end
+	local CreatedEnd = false
+	local IsEndPiece = false
+	local TargetNum = math.random(1,math.floor(count/2))
+	count = 0
+	local function AddToCount()
+		count = count + 1
+		if count == TargetNum then
+			IsEndPiece = true
+			return "EndPiece"
+		else
+			IsEndPiece = false
+			return "End"
+		end
+	end
+
+	local function CheckPlacedEnd()
+		if not CreatedEnd and IsEndPiece then
+			count = count - 1
+		end
+	end
+
+	for i,v in pairs(AddingNext) do
+		local Exits = v[4]
+		local ExitDirection = v[5]
+		if Exits == 1 then
+			local x,z,rot = GetXZandRot(v[1], v[2], v[3], ExitDirection)
+			CreatedEnd = CreateTile(x,z,rot,AddToCount())
+			CheckPlacedEnd()
+		elseif Exits == 2 then
+			if ExitDirection == "Left" then
+				local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Left")
+				CreatedEnd = CreateTile(x,z,rot,AddToCount())
+				CheckPlacedEnd()
+				local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Forward")
+				CreatedEnd = CreateTile(x,z,rot,AddToCount())
+				CheckPlacedEnd()
+			elseif ExitDirection == "Forward" then
+				local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Left")
+				CreatedEnd = CreateTile(x,z,rot,AddToCount())
+				CheckPlacedEnd()
+				local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Right")
+				CreatedEnd = CreateTile(x,z,rot,AddToCount())
+				CheckPlacedEnd()
+			elseif ExitDirection == "Right" then
+				local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Forward")
+				CreatedEnd = CreateTile(x,z,rot,AddToCount())
+				CheckPlacedEnd()
+				local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Right")
+				CreatedEnd = CreateTile(x,z,rot,AddToCount())
+				CheckPlacedEnd()
+			end
+		elseif Exits == 3 then
+			local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Left")
+			CreatedEnd = CreateTile(x,z,rot,AddToCount())
+			CheckPlacedEnd()
+			local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Forward")
+			CreatedEnd = CreateTile(x,z,rot,AddToCount())
+			CheckPlacedEnd()
+			local x,z,rot = GetXZandRot(v[1], v[2], v[3], "Right")
+			CreatedEnd = CreateTile(x,z,rot,AddToCount())
+			CheckPlacedEnd()
+		end
+	end
+end
+
+function module.CheckTile(x,z)
+	local InTiles = false
+	local InAdded = false
+	for i,v in pairs(Tiles) do
+		if v[1] == x and v[2] == z then
+			InTiles = true
+			print(x..","..z.." Was in Tiles.")
+		end
+	end
+	for i,v in pairs(AddToNext) do
+		if v[1] == x and v[2] == z then
+			InAdded = true
+			print(x..","..z.." Was in Added.")
+		end
+	end
+	if not InTiles then
+		print(x..","..z.." Was Not in Tiles.")
+	end
+	if not InAdded then
+		print(x..","..z.." Was Not in Added.")
+	end
+end
+
+return module
