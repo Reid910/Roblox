@@ -1,0 +1,187 @@
+local forked = {}
+local fork2 = {}
+local fork3 = {}
+local key = nil
+
+game:GetService("ReplicatedStorage").Key.Event:Connect(function(Key)
+	key = Key
+end)
+
+script.Lightning.Event:Connect(function(x,y,z)
+	local fold = Instance.new("Folder", workspace)
+	fold.Name = "LightningFold"
+	local folds = Instance.new("Folder", workspace)
+	folds.Name = "Sounds"
+	--//Sounds\\--
+	local Lighthit = Instance.new("Part",folds)
+	Lighthit.Name = "Centre"
+	Lighthit.Size = Vector3.new(1,1,1)
+	Lighthit.Transparency = 1
+	Lighthit.CanCollide = false
+	Lighthit.Anchored = true
+	if math.random(1,3)==3 then
+		Instance.new("Fire",Lighthit)	
+	end
+	Lighthit.Position = Vector3.new(x,y,z)
+	local sound = Instance.new("Sound", Lighthit)
+	sound.SoundId = "rbxassetid://1843190522"
+	sound.Volume = 2.5
+	sound.TimePosition = 1
+	sound.MaxDistance = sound.MaxDistance * 2
+	sound:Play()
+	local Nerd = Instance.new("Part",folds)
+	Nerd.Name = "Centre"
+	Nerd.Size = Vector3.new(1,1,1)
+	Nerd.Transparency = 1
+	Nerd.CanCollide = false
+	Nerd.Anchored = true
+	Nerd.Position = Vector3.new(x,y+50,z)
+	local sound2 = Instance.new("Sound", Nerd)
+	local number = math.random(1,3)
+	if number == 3 then
+		sound2.SoundId = "rbxassetid://4961240438"
+	elseif number == 2 then
+		sound2.SoundId = "rbxassetid://133426162"
+	else
+		sound2.SoundId = "rbxassetid://3158894371"
+	end
+	sound2.MaxDistance = sound2.MaxDistance / 2
+	sound2.Volume = 5
+	sound2.TimePosition = 1
+	sound2:Play()
+	game.Lighting.Brightness = game.Lighting.Brightness + 50
+	wait(0.02)
+	game.Lighting.Brightness = game.Lighting.Brightness - 50
+	local Color = Color3.new(math.random(50,150),math.random(50,150),math.random(50,150))
+	
+	
+	for LightningBolts = 1, math.random(1,4) do
+		local copy = script.Light:Clone()
+		copy.One.Color = Color
+		copy.One.PointLight.Color = copy.One.Color
+		copy.Base.Color = copy.One.Color
+		copy.One.LightningV2.Color = ColorSequence.new(copy.One.Color)
+		copy.Parent = fold
+		copy.PrimaryPart.Position = Vector3.new(x,y,z)
+		copy.One.Position = Vector3.new(x,y + 2,z)
+		local points = {{x,y + 4,z}}
+		for i = 1, 50 do
+			local beam = copy.One:Clone()
+			beam.Name = i
+			
+			local One = points[i][1]
+			local Two = points[i][2]
+			local Three = points[i][3]
+			local newOne = One + math.random(-3,3)
+			local newTwo = Two + math.random(0,8)
+			local newThree = Three + math.random(-3,3)
+			local dist = (Vector3.new(One, Two, Three)-Vector3.new(newOne,newTwo,newThree)).Magnitude
+			
+			beam.Size = Vector3.new(0.5,0.5,dist + 0.2)
+			beam.Parent = copy
+			beam.CFrame = CFrame.new(Vector3.new(One, Two, Three), Vector3.new(newOne,newTwo,newThree)) * CFrame.new(0, 0, -dist / 2)
+			points[#points+1] = {newOne,newTwo,newThree}
+			
+			if math.random(1,3) == 1 then
+				for FirstFork = 1, math.random(1,2) do
+					for Clear = 1, #forked do
+						table.remove(forked, Clear)
+					end
+					local beam = copy.One:Clone()
+					beam.Name = "ForkClone"
+					
+					beam.Parent = copy
+					local forked = {
+						points[i+1][1]+math.random(-4,4),
+						points[i+1][2]+math.random(-2,2),
+						points[i+1][3]+math.random(-4,4)
+					}
+					dist = (Vector3.new(points[i+1][1], points[i+1][2], points[i+1][3])-Vector3.new(forked[1],forked[2],forked[3])).Magnitude
+					beam.Size = Vector3.new(0.4,0.4,dist + 0.2)
+					beam.CFrame = CFrame.new(Vector3.new(points[i+1][1], points[i+1][2], points[i+1][3]), Vector3.new(forked[1],forked[2],forked[3])) * CFrame.new(0, 0, -dist / 2)
+					for SecondFork = math.random(0,1), math.random(1,2) do
+						for Clear = 1, #fork2 do
+							table.remove(fork2, Clear)
+						end
+						local beam = copy.One:Clone()
+						beam.Name = "ForkClone"
+						
+						beam.Parent = copy
+						local fork2 = {
+							forked[1]+math.random(-3,3),
+							forked[2]+math.random(-3,3),
+							forked[3]+math.random(-3,3)
+						}
+						dist = (Vector3.new(forked[1],forked[2],forked[3])-Vector3.new(fork2[1],fork2[2],fork2[3])).Magnitude
+						beam.Size = Vector3.new(0.3,0.3,dist + 0.2)
+						beam.CFrame = CFrame.new(Vector3.new(forked[1],forked[2],forked[3]), Vector3.new(fork2[1],fork2[2],fork2[3])) * CFrame.new(0, 0, -dist / 2)
+						for ThirdFork = math.random(0,1), math.random(1,2) do
+							for Clear = 1, #fork3 do
+								table.remove(fork3, Clear)
+							end
+							local beam = copy.One:Clone()
+							beam.Name = "ForkClone"
+							
+							beam.Parent = copy
+							local fork3 = {
+								fork2[1]+math.random(-2,2),
+								fork2[2]+math.random(-4,4),
+								fork2[3]+math.random(-2,2)
+							}
+							dist = (Vector3.new(fork2[1],fork2[2],fork2[3])-Vector3.new(fork3[1],fork3[2],fork3[3])).Magnitude
+							beam.Size = Vector3.new(0.3,0.3,dist + 0.2)
+							beam.CFrame = CFrame.new(Vector3.new(fork2[1],fork2[2],fork2[3]), Vector3.new(fork3[1],fork3[2],fork3[3])) * CFrame.new(0, 0, -dist / 2)
+						end
+					end
+				end
+			end
+		end
+		wait(0.01)
+		--wait(20) --i use this to actually see the lightning instead of it disapering instantly! (move the "--" to the wait(0.01))
+		local items = fold:GetChildren()
+		for item = 1, #fold:GetChildren() do
+			items[item]:Destroy()
+		end
+	end
+	wait(0.01)
+	game.Lighting.Brightness = game.Lighting.Brightness + 50
+	wait(0.1)
+	fold:Destroy()
+	game.Lighting.Brightness = game.Lighting.Brightness - 50
+	wait(10)
+	folds:Destroy()
+end)
+
+
+--USE THIS TO TARGET OBJECTS (not models)
+while true do
+	--[[
+	local targets = {
+		workspace.Target1, workspace.Target2, workspace.Target3
+	}
+	wait(math.random(0,10))
+	local base = targets[math.random(1,3)]
+	script.Lightning:Fire(base.Position.X + math.random(-(base.Size.X/2),base.Size.X/2),base.Position.Y + base.Size.Y/2, base.Position.Z + math.random(-(base.Size.Z/2),base.Size.Z/2))
+	]]
+	
+	wait(2)
+	script.Lightning:Fire(0,0,0)
+	local base = workspace.Baseplate
+	--script.Lightning:Fire(base.Position.X + math.random(-(base.Size.X/2),base.Size.X/2),base.Position.Y + base.Size.Y/2, base.Position.Z + math.random(-(base.Size.Z/2),base.Size.Z/2))
+	
+end
+
+--[[
+game:GetService("ReplicatedStorage").LightningAll.OnServerEvent:Connect(function(player, KEY)
+	--print(KEY)
+	--print(key)
+	if KEY == key and key ~= nil and KEY ~= nil then
+		local playerlist = game:GetService("Players"):GetChildren()
+		if #playerlist > 0 then
+			for i = 1, #playerlist do
+				local base = workspace[playerlist[i].Name].HumanoidRootPart
+				script.Lightning:Fire(base.Position.X + math.random(-(base.Size.X/2),base.Size.X/2),base.Position.Y + base.Size.Y/2, base.Position.Z + math.random(-(base.Size.Z/2),base.Size.Z/2))
+			end
+		end	
+	end
+end)]]
