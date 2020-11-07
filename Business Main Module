@@ -1,0 +1,74 @@
+local module = {}
+
+--Add Other Stuff Above Here
+
+local MessagingService = game:GetService("MessagingService")
+local OSS = game:GetService("DataStoreService"):GetOrderedDataStore("Servers")--OrderedServerStore
+
+function module.AddThisServer()
+	MessagingService:PublishAsync("LOGS","( OSS-SERVER-Open ) -- ( OSS-"..game.JobId.." )")
+	MessagingService:SubscribeAsync("OSS-"..game.JobId,module.ServerCalculatorOn)
+	local t = os.date("*t", os.time())
+	require(workspace.Logs).StartLogs("( OSS-SERVER-Open ) -- ( OSS-"..game.JobId.." ) ST -> ( "..t["month"].."/"..t["day"].."/"..t["year"].."-"..t["hour"]..":"..t["min"]..":"..t["sec"].." )")
+	local Pages = OSS:GetSortedAsync(false,10)
+	if #Pages:GetCurrentPage() <= 0 then
+		print("Starting Calculator")
+		module.ServerCalculatorOn()
+	else
+		print("There is already a server running")
+	end
+	game.Players.PlayerAdded:Connect(function(plr)
+		module.UpdateServerCount()
+		local Fold = Instance.new("Folder", plr)
+		Fold.Name = "leaderstats"
+		local Cash = Instance.new("NumberValue", Fold)
+		Cash.Name = "USD"
+		Cash.Value = 125
+	end)
+	game.Players.PlayerRemoving:Connect(function()
+		module.UpdateServerCount()
+	end)
+	module.UpdateServerCount()
+	game:BindToClose(module.RemoveThisServer)
+end
+
+function module.UpdateServerCount()
+	local Success = pcall(function()
+		if game.JobId ~= "" then
+			OSS:SetAsync("OSS-"..game.JobId,#game.Players:GetPlayers())--REMOVE THIS TO NOT SAVE
+		end
+	end)
+	if not Success then
+		wait()
+		module.UpdateServerCount()
+	end
+end
+
+function module.RemoveThisServer()
+	local Success, ErrMsg = pcall(function()
+		if game.JobId ~= "" then
+			OSS:RemoveAsync("OSS-"..game.JobId)--REMOVE THIS TO NOT SAVE
+			if game.ServerStorage.Global.Calculator.Value then
+				local Pages = OSS:GetSortedAsync(false,10)
+				if #Pages:GetCurrentPage() >= 1 then
+					MessagingService:PublishAsync("LOGS","( OSS-UPDATE ) - Changing calculator server to -- ( "..Pages:GetCurrentPage()[1].key.." )")
+					MessagingService:PublishAsync(Pages:GetCurrentPage()[1].key)
+				end
+			end
+		end
+		MessagingService:PublishAsync("LOGS","( OSS-SERVER-Close ) -- ( OSS-"..game.JobId.." )")
+	end)
+	if not Success then
+		if ErrMsg then
+			print(ErrMsg)
+		end
+		wait()
+		module.RemoveThisServer()
+	end
+end
+
+function module.ServerCalculatorOn()
+	game.ServerStorage.ServerEvents.TurnCalculatorOn:Fire()
+end
+
+return module
