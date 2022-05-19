@@ -20,6 +20,19 @@ function DoNotationShift(a,b) -- used to be the check 1-10
 	end
 end
 
+function m.format(a)
+	return DoNotationShift(a,0)
+end
+
+function m.IsLarger(a,aNot,b,bNot)
+	if aNot > bNot then
+		return true
+	elseif aNot == bNot and a > b then
+		return true
+	end
+	return false
+end
+
 function m.AddNumbers(aNum,aNot,bNum,bNot)
 	local difference = aNot-bNot --|| 308-305 = 3 || 205-300 = -95 ||
 	if math.abs(difference) > m.LIMIT then -- if it goes over the limit just return a or b
@@ -78,7 +91,8 @@ function m.DivideNumbers(aNum,aNot,bNum,bNot)
 	return DoNotationShift(aNum/bNum,aNot-bNot)
 end
 
-function m.ExponentialNumbers(aNum,aNot,bNum,bNot)
+function m.ExponentialNumbers(aNum,aNot,bNum,bNot) -- THIS IS ENTIRELY EXPERIMENTAL AND NOT WORKING
+	-- ( Although the execution time for this got destroyed ( its really fast now ) this should still be left alone. )
 	local a,b = 1,0
 	local NewNum,NewNot = DoNotationShift(aNum,aNot)
 	bNum,bNot = DoNotationShift(bNum,bNot)
