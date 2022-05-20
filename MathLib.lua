@@ -24,6 +24,10 @@ function m.format(a)
 	return DoNotationShift(a,0)
 end
 
+function m.UnformatSmallN(a,b)
+	return a * math.pow(10,b)
+end
+
 function m.IsLarger(a,aNot,b,bNot)
 	if aNot > bNot then
 		return true
