@@ -20,8 +20,8 @@ function DoNotationShift(a,b) -- used to be the check 1-10
 	end
 end
 
-function m.format(a)
-	return DoNotationShift(a,0)
+function m.format(a,b)
+	return DoNotationShift(a,b or 0)
 end
 
 function m.UnformatSmallN(a,b)
