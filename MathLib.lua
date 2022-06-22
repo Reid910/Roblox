@@ -11,6 +11,9 @@ function DoNotationShift(a,b) -- used to be the check 1-10
 	if a == 0 then
 		return 0,0
 	end
+	local leftover_not = b-math.floor(b)
+	a *= math.pow(10,leftover_not)
+	b = math.floor(b)
 	if a >= 1 then
 		local exp = math.floor(math.log10(a)) -- number of zeros
 		return Limit(a / math.pow(10,exp)), b+exp
@@ -95,18 +98,8 @@ function m.DivideNumbers(aNum,aNot,bNum,bNot)
 	return DoNotationShift(aNum/bNum,aNot-bNot)
 end
 
-function m.ExponentialNumbers(aNum,aNot,bNum,bNot) -- THIS IS ENTIRELY EXPERIMENTAL AND NOT WORKING
-	-- ( Although the execution time for this got destroyed ( its really fast now ) this should still be left alone. )
-	local a,b = 1,0
-	local NewNum,NewNot = DoNotationShift(aNum,aNot)
-	bNum,bNot = DoNotationShift(bNum,bNot)
-	while true do
-		a,b = m.AddNumbers(a,b,1,0)
-		NewNum,NewNot = m.MultiplyNumbers(NewNum,NewNot,aNum,aNot)
-		if a == bNum and b == bNot then
-			return Limit(NewNum),NewNot
-		end
-	end
+function m.Pow(aNum,aNot,bNum,bNot)
+	return DoNotationShift(math.pow(aNum,bNum*math.pow(10,bNot)),aNot*bNum*math.pow(10,bNot))
 end
 
 return m
