@@ -35,7 +35,7 @@ function num.Temp(a,b)
 	return {N=a,Notation=b}
 end
 
-function num:Update(a,b)
+function num:Update(a,b) -- this exists because I either want to update the actual value or just get the result.
 	self.N,self.Notation = a,b
 	if self.NValue then
 		self.NValue.Value = a
