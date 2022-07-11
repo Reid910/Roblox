@@ -1,6 +1,4 @@
-local m = {
-	
-}
+local m = {}
 m.__index = m
 
 local Decimal_Limit = 5
@@ -36,21 +34,28 @@ function NewStat(T,N)
 	return S
 end
 
-function m.NewNum(StatName,Parent)
+function m.NewNum(a,b,StatName,Parent)
 
 	local NewNumber = {}
 	setmetatable(NewNumber,m)
-
-	NewNumber.N = 0
-	NewNumber.Notation = 0
-
+	
+	if type(a) == "table" then
+		NewNumber.N,NewNumber.Notation = a.N,a.Notation
+	else
+		NewNumber.N = a or 0
+		NewNumber.Notation = b or 0
+	end
+	
 	if StatName and Parent then -- creating a numbervalue
 		local NumbValue = NewStat("NumberValue",StatName)
 		NumbValue.Value = NewNumber.N
 		NumbValue:SetAttribute("Not",NewNumber.Notation)
 		NumbValue.Parent = Parent
+		NewNumber.Stat = NumbValue
 	end
-
+	
+	Notation_Shift(NewNumber)
+	
 	return NewNumber
 
 end
@@ -59,17 +64,28 @@ function m.ConvertNumber(num)
 	return m.NewNum():Set(Notation_Shift(num))
 end
 
-function m:Set(a,b)
-
-	self.N = a
-	self.Notation = b
+function m:Set(a,b) -- works with one parameter
+	
+	if type(a) == "table" then
+		self.N,self.Notation = a.N,a.Notation
+		
+		if self.Stat then
+			self.Stat.Value = self.N
+			self.Stat:SetAttribute("Not",self.Notation)
+		end
+		
+		return self
+	end
+	
+	self.N = a or 0
+	self.Notation = b or 0
 
 	return self
 end
 
 m.__add = function(input,other)
 	
-	local result = m.NewNum():Set(input.N,input.Notation)
+	local result = m.NewNum(input.N,input.Notation)
 	
 	local difference = input.Notation-other.Notation --|| 308-305 = 3 || 205-300 = -95 ||
 	if math.abs(difference) > Decimal_Limit then -- if it goes over the limit just return a or b
@@ -98,7 +114,7 @@ end
 
 m.__sub = function(input,other)
 	
-	local result = m.NewNum():Set(input.N,input.Notation)
+	local result = m.NewNum(input.N,input.Notation)
 	
 	local difference = input.Notation-other.Notation --|| 308-305 = 3 || 205-300 = -95 ||
 	if math.abs(difference) > Decimal_Limit then
@@ -125,15 +141,15 @@ m.__sub = function(input,other)
 end
 
 m.__unm = function(input)
-	return m.NewNum():Set(-input.N,input.Notation)
+	return m.NewNum(-input.N,input.Notation)
 end
 
 m.__mul = function(input,other)
-	return Notation_Shift(m.NewNum():Set(input.N*other.N,input.Notation+other.Notation))
+	return Notation_Shift(m.NewNum(input.N*other.N,input.Notation+other.Notation))
 end
 
 m.__div = function(input,other)
-	return Notation_Shift(m.NewNum():Set(input.N/other.N,input.Notation-other.Notation))
+	return Notation_Shift(m.NewNum(input.N/other.N,input.Notation-other.Notation))
 end
 
 --m.__mod = function(input,other) -- this wasnt implemented yet ( modulus )
@@ -143,8 +159,7 @@ end
 
 m.__pow = function(input,other) -- this requires a small "other" number so it doesnt go past 1e+308 ( also requires ^ to run )
 	local big_other = other.N*math.pow(10,other.Notation)
-	local result = m.NewNum():Set(math.pow(input.N, big_other), input.Notation * big_other)
-	return Notation_Shift(result)
+	return Notation_Shift(m.NewNum(math.pow(input.N, big_other), input.Notation * big_other))
 end
 
 m.__eq = function(input,other) -- equals
@@ -176,8 +191,11 @@ end
 
 m.__tostring = function(input)
 	-- format the string
-	print("Needs formatting")
 	return input.N .. "e+" .. input.Notation -- kinda works for now
+end
+
+function m.Abs(input)
+	return m.NewNum(math.abs(input.N),input.Notation)
 end
 
 return m
