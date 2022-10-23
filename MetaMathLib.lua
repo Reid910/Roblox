@@ -14,8 +14,7 @@ function Notation_Shift(num) -- does this actually work 100% ? I mean it works t
 		num.N,num.Notation = 0,0
 		return num
 	end
-	local leftover_not = b-math.floor(b)
-	a *= math.pow(10,leftover_not)
+	a *= math.pow(10,b-math.floor(b))
 	b = math.floor(b)
 	if a >= 1 then
 		local exp = math.floor(math.log10(a)) -- number of zeros
@@ -35,7 +34,7 @@ function NewStat(T,N)
 end
 
 function m.NewNum(a,b,StatName,Parent)
-
+	
 	local NewNumber = {}
 	setmetatable(NewNumber,m)
 	
@@ -57,11 +56,23 @@ function m.NewNum(a,b,StatName,Parent)
 	Notation_Shift(NewNumber)
 	
 	return NewNumber
-
+	
 end
 
 function m.ConvertNumber(num)
-	return m.NewNum():Set(Notation_Shift(num))
+	return Notation_Shift(m.NewNum():Set(num))
+end
+
+function ConvertInputs(a,b)
+	if type(a ~= "table") then
+		a = m.ConvertNumber(a)
+	end
+	if b then
+		if type(b ~= "table") then
+			b = m.ConvertNumber(b)
+		end
+	end
+	return a,b
 end
 
 function m:Set(a,b) -- works with one parameter
@@ -79,11 +90,19 @@ function m:Set(a,b) -- works with one parameter
 	
 	self.N = a or 0
 	self.Notation = b or 0
-
+	
 	return self
 end
 
 m.__add = function(input,other)
+	
+	input,other = ConvertInputs(input,other)
+	
+	if input.N == 0 then
+		return other
+	elseif other.N == 0 then
+		return input
+	end
 	
 	local result = m.NewNum(input.N,input.Notation)
 	
@@ -95,15 +114,15 @@ m.__add = function(input,other)
 			return result:Set(other.N,other.Notation)
 		end
 	end
-
+	
 	local abs_pow_diff = math.pow(10,math.abs(difference))
-
+	
 	if difference > 0 then
 		result.N *= abs_pow_diff
 	elseif difference < 0 then
 		result.N /= abs_pow_diff
 	end
-
+	
 	result.N += other.N
 	result.N /= abs_pow_diff
 	result.Notation = result.Notation > other.Notation and result.Notation or other.Notation
@@ -113,6 +132,14 @@ m.__add = function(input,other)
 end
 
 m.__sub = function(input,other)
+	
+	input,other = ConvertInputs(input,other)
+	
+	if input.N == 0 then
+		return other
+	elseif other.N == 0 then
+		return input
+	end
 	
 	local result = m.NewNum(input.N,input.Notation)
 	
@@ -124,9 +151,9 @@ m.__sub = function(input,other)
 			return result:Set(other.N,other.Notation) -- because we subtract b from a
 		end
 	end
-
+	
 	local abs_pow_diff = math.pow(10,math.abs(difference))
-
+	
 	if difference > 0 then
 		result.N *= abs_pow_diff
 	elseif difference < 0 then
@@ -141,14 +168,17 @@ m.__sub = function(input,other)
 end
 
 m.__unm = function(input)
+	input = ConvertInputs(input)
 	return m.NewNum(-input.N,input.Notation)
 end
 
 m.__mul = function(input,other)
+	input,other = ConvertInputs(input,other)
 	return Notation_Shift(m.NewNum(input.N*other.N,input.Notation+other.Notation))
 end
 
 m.__div = function(input,other)
+	input,other = ConvertInputs(input,other)
 	return Notation_Shift(m.NewNum(input.N/other.N,input.Notation-other.Notation))
 end
 
@@ -158,11 +188,13 @@ end
 --end
 
 m.__pow = function(input,other) -- this requires a small "other" number so it doesnt go past 1e+308 ( also requires ^ to run )
+	input,other = ConvertInputs(input,other)
 	local big_other = other.N*math.pow(10,other.Notation)
 	return Notation_Shift(m.NewNum(math.pow(input.N, big_other), input.Notation * big_other))
 end
 
 m.__eq = function(input,other) -- equals
+	input,other = ConvertInputs(input,other)
 	if input.Notation == other.Notation then
 		if input.N == other.N then
 			return true
@@ -172,6 +204,7 @@ m.__eq = function(input,other) -- equals
 end
 
 m.__lt = function(input,other) -- less than
+	input,other = ConvertInputs(input,other)
 	if input.Notation < other.Notation then
 		if input.N < other.N then
 			return true
@@ -181,6 +214,7 @@ m.__lt = function(input,other) -- less than
 end
 
 m.__le = function(input,other) -- less than equal to
+	input,other = ConvertInputs(input,other)
 	if input.Notation <= other.Notation then
 		if input.N <= other.N then
 			return true
@@ -189,9 +223,13 @@ m.__le = function(input,other) -- less than equal to
 	return false
 end
 
-m.__tostring = function(input)
-	-- format the string
-	return input.N .. "e+" .. input.Notation -- kinda works for now
+m.__tostring = function(input) -- format the string
+	input = ConvertInputs(input)
+	if input.Notation == 0 then
+		return input.N
+	else
+		return input.N .. "e+" .. input.Notation
+	end
 end
 
 function m.Abs(input)
