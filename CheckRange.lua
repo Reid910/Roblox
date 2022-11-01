@@ -1,7 +1,11 @@
-function m.CheckInRange(a,b,Dist)
-	Dist = Dist or m.UEminDistance
+function GetPV(Vector) -- power of vector
+	return Vector.x*Vector.x + Vector.y*Vector.y + Vector.z*Vector.z
+end
+
+function CheckInRange(a,b,Dist)
+	Dist = Dist
 	local d = b-a
-	local sqrd = d.x*d.x + d.y*d.y + d.z*d.z
+	local sqrd = GetPV(d)
 	if sqrd <= Dist*Dist then
 		return true
 	else
