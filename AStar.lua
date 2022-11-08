@@ -107,6 +107,8 @@ return function(node_a,node_b,team_id) -- a = start , b = finish
 	Last_pnode = Last_pnode.p_node -- cant use the table
 	
 	table.insert(Reverse_path,node_b)
+		
+	table.insert(Reverse_path,Last_pnode)
 	
 	local copy_list = {}
 	
