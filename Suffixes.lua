@@ -13,6 +13,10 @@ return function(value,DV)
 	
 	local Front = value / math.pow(1000,SN)
 	
+	if math.floor(Front) == Front then
+		DV = 0
+	end
+	
 	return string.format("%." .. DV .. "f",Front) .. Suffixes[SN + 1] or ("e+"..(SN*3)) -- 5.4 K | 8.92 T
 	
 end
