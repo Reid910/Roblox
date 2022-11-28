@@ -15,11 +15,14 @@ function RunReturn(_table,Delta)
 	local s,e,self
 	for i = #_table,1,-1 do self = _table[i]
 		s,e = pcall(self._function,Delta)
+		if e == true then
+			table.remove(_table,i)
+		end
 		if not s then
 			warn(e.."\n-- -- | Serverheart return-true |")
 			_table[i].C += 1
 			if _table[i].C > 5 then
-				table.remove(table,i)
+				table.remove(_table,i)
 			end
 		else
 			_table[i].C = 0
