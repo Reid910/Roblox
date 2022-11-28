@@ -17,6 +17,7 @@ function RunReturn(_table,Delta)
 		s,e = pcall(self._function,Delta)
 		if e == true then
 			table.remove(_table,i)
+			continue
 		end
 		if not s then
 			warn(e.."\n-- -- | Serverheart return-true |")
@@ -45,16 +46,16 @@ return function(_function,Renderstepped,Permanent)
 	self._function = _function
 	if Permanent then
 		if Renderstepped then
-			table.insert(render_perma,_function)
+			table.insert(render_perma,self)
 		else
-			table.insert(perma,_function)
+			table.insert(perma,self)
 		end
 	else
 		self.C = 0
 		if Renderstepped then
-			table.insert(render_r_true,_function)
+			table.insert(render_r_true,self)
 		else
-			table.insert(r_true,_function)
+			table.insert(r_true,self)
 		end
 	end
 end
