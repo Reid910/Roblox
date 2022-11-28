@@ -7,6 +7,10 @@ game:GetService("RunService").Heartbeat:Connect(function(Delta)
 	end
 	for i = #r_true,1,-1 do self = r_true[i]
 		s,e = pcall(self._function,Delta)
+		if e == true then
+			table.remove(r_true,i)
+			continue
+		end
 		if not s then
 			warn(e.."\n-- -- | Serverheart return-true |")
 			r_true[i].C += 1
@@ -23,9 +27,9 @@ return function(_function,Permanent)
 	local self = {}
 	self._function = _function
 	if Permanent then
-		table.insert(Perma,_function)
+		table.insert(Perma,self)
 	else
 		self.C = 0
-		table.insert(r_true,_function)
+		table.insert(r_true,self)
 	end
 end
