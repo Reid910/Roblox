@@ -45,17 +45,9 @@ return function(_function,Renderstepped,Permanent)
 	local self = {}
 	self._function = _function
 	if Permanent then
-		if Renderstepped then
-			table.insert(render_perma,self)
-		else
-			table.insert(perma,self)
-		end
+		table.insert(Renderstepped and render_perma or perma,self)
 	else
 		self.C = 0
-		if Renderstepped then
-			table.insert(render_r_true,self)
-		else
-			table.insert(r_true,self)
-		end
+		table.insert(Renderstepped and render_r_true or r_true,self)
 	end
 end
