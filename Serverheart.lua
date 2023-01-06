@@ -4,6 +4,9 @@ game:GetService("RunService").Heartbeat:Connect(function(Delta)
 	local s,e,self
 	for i = 1,#Perma do self = Perma[i]
 		s,e = pcall(self._function,Delta)
+		if not s then
+			warn(e.."\n-- -- | Serverheart return-true |")
+		end
 	end
 	for i = #r_true,1,-1 do self = r_true[i]
 		s,e = pcall(self._function,Delta)
