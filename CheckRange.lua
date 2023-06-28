@@ -3,7 +3,6 @@ function GetPV(Vector) -- power of vector
 end
 
 function CheckInRange(a,b,Dist)
-	Dist = Dist
 	local d = b-a
 	local sqrd = GetPV(d)
 	if sqrd <= Dist*Dist then
