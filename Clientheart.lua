@@ -34,7 +34,7 @@ end)
 
 _G.ServerHeart = function(_function,Renderstepped,Permanent,TrueBreak,Errorcall,ErrorBreakCount)
 	local t = {_function = _function, Permanent = Permanent, TrueBreak = TrueBreak,
-		Errorcall = Errorcall, ErrorBreakCount = ErrorBreakCount, C = 0}
+		Errorcall = Errorcall, ErrorBreakCount = ErrorBreakCount or 5, C = 0}
 	if Renderstepped then
 		table.insert(render_funcs,t)
 	else
