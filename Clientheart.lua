@@ -1,53 +1,47 @@
-local run = game:GetService("RunService")
-local perma,render_perma,r_true,render_r_true = {},{},{},{} -- permanent functions, functions that return true
-
-function RunPerma(_table,Delta)
-	local s,e,self
-	for i = 1,#_table do self = _table[i]
-		s,e = pcall(self._function,Delta)
-		if not s then
-			warn(e.."\n-- -- | Serverheart return-true |")
-		end
-	end
+local RunService = game:GetService("RunService")
+local Testservice,funcs,render_funcs = game:GetService("TestService"),{},{}
+function Err(Error)
+	Testservice:Message(debug.traceback("		| ServerHeart |\nError: "..Error.."\n",2))
 end
 
-function RunReturn(_table,Delta)
-	local s,e,self
-	for i = #_table,1,-1 do self = _table[i]
-		s,e = pcall(self._function,Delta)
-		if e == true then
-			table.remove(_table,i)
-			continue
-		end
-		if not s then
-			warn(e.."\n-- -- | Serverheart return-true |")
-			_table[i].C += 1
-			if _table[i].C > 5 then
-				table.remove(_table,i)
+function RunTable(Table,Delta)
+	for i = #Table,1,-1 do local self = Table[i]
+		local s,r = xpcall(self._function,Err,Delta)
+		if not s and not self.Permanent then
+			if self.C >= self.ErrorBreakCount then
+				if self.Errorcall then pcall(self.Errorcall) end
+				table.remove(Table,i)
+			else
+				self.C += 1
 			end
-		else
-			_table[i].C = 0
+		elseif s and r and self.TrueBreak then
+			table.remove(Table,i)
 		end
 	end
 end
 
-run.Heartbeat:Connect(function(Delta)
-	RunPerma(perma,Delta)
-	RunReturn(r_true,Delta)
+RunService.Heartbeat:Connect(function(Delta)
+	debug.profilebegin("HeartbeatProfile")
+	RunTable(funcs,Delta)
+	debug.profileend()
 end)
 
-run.RenderStepped:Connect(function(Delta)
-	RunPerma(render_perma,Delta)
-	RunReturn(render_r_true,Delta)
+RunService.RenderStepped:Connect(function(Delta)
+	debug.profilebegin("RenderheartProfile")
+	RunTable(render_funcs,Delta)
+	debug.profileend()
 end)
 
-return function(_function,Renderstepped,Permanent)
-	local self = {}
-	self._function = _function
-	if Permanent then
-		table.insert(Renderstepped and render_perma or perma,self)
+_G.ServerHeart = function(_function,Renderstepped,Permanent,TrueBreak,Errorcall,ErrorBreakCount)
+	local t = {_function = _function, Permanent = Permanent, TrueBreak = TrueBreak,
+		Errorcall = Errorcall, ErrorBreakCount = ErrorBreakCount, C = 0}
+	if Renderstepped then
+		table.insert(render_funcs,t)
 	else
-		self.C = 0
-		table.insert(Renderstepped and render_r_true or r_true,self)
+		table.insert(funcs,t)
 	end
 end
+
+return _G.ServerHeart
+-- Errorcall is a callback function that is run when the function 
+-- ErrorBreakCount is a NUMBER that tells the code when to call Errorcall and remove from the serverheart
