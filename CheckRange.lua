@@ -11,3 +11,9 @@ function CheckInRange(a,b,Dist)
 		return false
 	end
 end
+
+function RangeCheck(A,B,Range)
+	local Diff = B-A
+	local POW = Diff*Diff
+	return (POW.X+POW.Z) <= Range*Range
+end
