@@ -1,22 +1,33 @@
+local Suffixes = {"K", "M", "B", "T", "Qd", "Qn", "Sx", "Sp", "Oc", "No", "Dc", "Uc"}
 
-local Suffixes = {"", "K", "M", "B", "T", "Qd", "Qn", "Sx", "Sp", "Oc", "No", "Dc", "Uc",}
+function FormatDecimals(Num:number, Decimals:number) -- sets the decimals for the text
+	return string.format("%." .. Decimals .. "f",Num)
+end
 
-return function(value,DV)
-	
-	if not value or value < 1 then
-		return 0
+function C:FormatCommas(Number: number)
+	local Formatted = tostring(Number)
+	local Updated, Count = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+	if Count == 0 then
+		return Updated
+	else
+		return C:FormatCommas(Updated)
 	end
+end
+
+function C:Number(Num:number, Decimals:number, ForceENotation:BoolValue)
+	if Num < 1e9 then return C:FormatCommas( Num == math.floor(Num) and FormatDecimals(Num,0) or FormatDecimals(Num,2)) end
 	
-	DV = DV or value >= 1000 and 2 or 0
+	local Notation = math.floor(math.log(Num,10))
 	
-	local SN = math.floor(math.log(value,1000))
+	local kNotation = math.floor(math.log(Num,1000))
 	
-	local Front = value / math.pow(1000,SN)
+	local Front = Num / math.pow(1000,kNotation)
 	
-	if math.floor(Front) == Front then
-		DV = 0
+	Decimals = (math.floor(Front) == Front) and 0 or (Decimals or 2)
+	
+	if (kNotation <= #Suffixes and not ForceENotation) then
+		return string.format("%." .. Decimals .. "f",Num / math.pow(1000,kNotation)) .. ((kNotation > 0 and Suffixes[kNotation]) or "")
+	else
+		return string.format("%." .. Decimals .. "f",Num / math.pow(10,Notation)) .. (kNotation > 0 and "e+" .. Notation or "")
 	end
-	
-	return string.format("%." .. DV .. "f",Front) .. Suffixes[SN + 1] or ("e+"..(SN*3)) -- 5.4 K | 8.92 T
-	
 end
