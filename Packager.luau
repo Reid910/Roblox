@@ -27,12 +27,14 @@ function Packager.Start()
 	for _,Module in Modules do
 		if Module.Init then
 			Module.Init()
+			Module.Init = nil
 		end
 	end
 	
 	for _,Module in Modules do
 		if Module.Start then
 			Module.Start()
+			Module.Start = nil
 		end
 	end
 	
@@ -43,7 +45,7 @@ end
 function Packager.Get(ModuleName)
 	local Module = Modules[ModuleName]
 	if not Module then
-		error(`No Package Named "{ModuleName}" {debug.traceback(nil, 2)}.`)
+		warn(`No Package Named "{ModuleName}" {debug.traceback(nil, 2)}.`)
 	else
 		return Module
 	end
